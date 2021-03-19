@@ -8,13 +8,13 @@ class App extends Component {
     modalUser: null,
     currentPage: 1,
     usersPerPage: 4,
+    searchTerm: null,
   };
 
   componentDidMount() {
     axios
       .get("https://reqres.in/api/users")
       .then((response) => {
-        console.log(response.data.data);
         this.successShow(response);
       })
       .catch((error) => {
@@ -41,14 +41,34 @@ class App extends Component {
     });
   };
 
+  handleSearchTermInput = (event) => {
+    const searchTerm = event.target.value;
+    this.setState({ searchTerm: searchTerm.length > 0 ? searchTerm : null });
+  };
+
   render() {
     const {
-      people,
       modalActive,
       modalUser,
       currentPage,
       usersPerPage,
+      searchTerm,
     } = this.state;
+
+    let { people } = this.state;
+    //getting people after filtering with searchTerm in first_name, lastt_name and email
+    people = !searchTerm
+      ? people
+      : people.filter(
+          (person) =>
+            person.first_name
+              .toLowerCase()
+              .includes(searchTerm.toLocaleLowerCase()) ||
+            person.last_name
+              .toLowerCase()
+              .includes(searchTerm.toLocaleLowerCase()) ||
+            person.email.toLowerCase().includes(searchTerm.toLocaleLowerCase())
+        );
 
     const indexOfLastPage = currentPage * usersPerPage;
     const indexOfFirstPage = indexOfLastPage - usersPerPage;
@@ -66,85 +86,95 @@ class App extends Component {
           key={number}
           id={number}
           onClick={() => this.handleClick(number)}
-          class={number === currentPage ? "active" : "nope"}
+          className={number === currentPage ? "active" : "nope"}
         >
           {number}
         </div>
       );
     });
 
-    console.log(currentPage);
     return (
       <>
         {modalActive && (
-          <div id="myModal" class="modal">
+          <div id="myModal" className="modal">
             <div
-              class="modal-header"
+              className="modal-header"
               onClick={() => this.handleModal({ modalActive })}
             >
-              <span class="close">&times;</span>
+              <span className="close">&times;</span>
               <h3>User Info</h3>
             </div>
-            <div class="modal-body">
-              <table class="container">
+            <div className="modal-body">
+              <table className="container">
                 <thead>
                   <tr>
-                    <th>{/* <h1>User Info</h1> */}</th>
-                    <th style={{ width: "12vw" }}>
-                      {/* <h1>First Name</h1> */}
-                    </th>
+                    <th />
+                    <th style={{ width: "12vw" }} />
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td>
-                      <span class="skyblue">ID: </span>
+                      <span className="skyblue">ID: </span>
                       {modalUser.id}
                     </td>
                     <td rowSpan="4">
                       <img
                         src={modalUser.avatar}
                         style={{ width: "10vw", height: "10vw" }}
+                        alt="avtar"
                       />
                     </td>
                   </tr>
                   <tr>
                     <td>
-                      <span class="skyblue">First Name: </span>
+                      <span className="skyblue">First Name: </span>
                       {modalUser.first_name}
                     </td>
                   </tr>
                   <tr>
                     <td>
-                      <span class="skyblue">Last Name: </span>
+                      <span className="skyblue">Last Name: </span>
                       {modalUser.last_name}
                     </td>
                   </tr>
 
                   <tr>
                     <td>
-                      <span class="skyblue">Email: </span> {modalUser.email}
+                      <span className="skyblue">Email: </span> {modalUser.email}
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div class="modal-footer">
+            <div className="modal-footer">
               <h3>Presented by Bala</h3>
             </div>
           </div>
         )}
         <h1>
-          <span class="blue">Users</span> <span class="yellow">List</span>
+          <span className="skyblue">Users</span>{" "}
+          <span className="yellow">List</span>
         </h1>
         <h2>
-          Created by{" "}
-          <a href="" target="_blank">
-            Senjuti Bala
-          </a>
+          Created by <a href="#">Senjuti Bala</a>
         </h2>
 
-        <table class="container">
+        <div className="wrap">
+          <div className="search">
+            <input
+              type="text"
+              className="searchTerm"
+              placeholder="What are you looking for?"
+              value={searchTerm || ""}
+              onChange={(text) => this.handleSearchTermInput(text)}
+            />
+            <button type="submit" className="searchButton">
+              <span className="darkblue">Search</span>
+            </button>
+          </div>
+        </div>
+        <table className="container">
           <thead>
             <tr>
               <th style={{ width: "5vw" }}>
@@ -168,6 +198,7 @@ class App extends Component {
                   <img
                     src={user.avatar}
                     style={{ width: "3vw", height: "3vw" }}
+                    alt="avtar"
                   />
                 </td>
                 <td>{user.first_name}</td>
@@ -175,7 +206,7 @@ class App extends Component {
               </tr>
             ))}
           </tbody>
-          <div class="pagination">{renderPageNumbers}</div>
+          <div className="pagination">{renderPageNumbers}</div>
         </table>
       </>
     );
